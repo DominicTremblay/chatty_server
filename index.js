@@ -6,9 +6,10 @@ import { Server } from 'socket.io';
 const port = process.env.PORT || 3001;
 
 const app = express();
+const server = http.createServer(app);
 app.use(morgan('dev'));
 
-const io = new Server(http.createServer(app), {
+const io = new Server(server, {
   cors: {
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
@@ -27,4 +28,4 @@ io.on('connection', (socket) => {
   })
 });
 
-app.listen(port, () => console.log(`Server running on port ${port}`));
+server.listen(port, () => console.log(`Server running on port ${port}`));
