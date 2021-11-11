@@ -13,7 +13,9 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
+    "faker": "^5.5.3",
     "morgan": "^1.10.0",
+    "randomcolor": "^0.6.2",
     "socket.io": "^4.3.2"
   },
   "devDependencies": {
