@@ -5,7 +5,6 @@ import faker from 'faker';
 import randomColor from 'randomcolor';
 import { Server } from 'socket.io';
 
-
 const port = process.env.PORT || 3001;
 
 const app = express();
@@ -29,12 +28,18 @@ const addUser = (socketId, users) => {
     messages: [],
   };
 
-  return users;
+  return users[socketId];
 };
 
 const removeUser = (socketId, users) => {
   delete users[socketId];
   return users;
+};
+
+const addNewMessage = (msg) => {
+  const { from } = msg;
+
+  users[from].messages.push(msg);
 };
 
 app.get('/', (req, res) => {
@@ -44,8 +49,16 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log(`connected: ${socket.id}`);
 
-  addUser(socket.id, users);
+  const newUser = addUser(socket.id, users);
   console.log(users);
+
+  socket.emit('init:user_info', newUser);
+
+  socket.on('msg:incoming', (msg) => {
+    addNewMessage(msg);
+    console.log("Broadcasting msg")
+    io.emit('msg:broadcast', msg);
+  });
 
   socket.on('disconnect', () => {
     console.log(`disconnected: ${socket.id}`);
