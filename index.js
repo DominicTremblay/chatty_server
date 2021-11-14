@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import faker from 'faker';
 import randomColor from 'randomcolor';
 import { Server } from 'socket.io';
+import { v4 as uuidv4 } from 'uuid';
 
 const port = process.env.PORT || 3001;
 
@@ -20,13 +21,41 @@ const io = new Server(server, {
 
 const users = {};
 
+const createAvatar = () => {
+  const avatars = {
+    Female: [
+      'https://i.imgur.com/nlhLi3I.png',
+      'https://i.imgur.com/z5LNkkB.png',
+      'https://i.imgur.com/v0JXau2.png',
+      'https://i.imgur.com/lRUnDgU.png',
+      'https://i.imgur.com/3GvwNBf.png',
+    ],
+    Male: [
+      'https://i.imgur.com/73hZDYK.png',
+      'https://i.imgur.com/5fUVPRP.png',
+      'https://i.imgur.com/DVpDmdR.png',
+      'https://i.imgur.com/2WZtOD6.png',
+      'https://i.imgur.com/ilT4JDe.png',
+    ],
+  };
+  const gender = Math.floor(Math.random() * 2) + 1 === 0 ? 'Female' : 'Male';
+  console.log({ gender });
+  const avatarArray = avatars[gender];
+  const userAvatar =
+    avatarArray[Math.floor(Math.random() * avatarArray.length)];
+
+  return userAvatar;
+};
+
 const addUser = (socketId, users) => {
   users[socketId] = {
-    id: socketId,
-    name: faker.internet.userName(),
+    socketId,
+    avatar: createAvatar(),
+    username: faker.internet.userName(),
     color: randomColor(),
-    messages: [],
   };
+
+  console.log(users[socketId]);
 
   return users[socketId];
 };
@@ -56,7 +85,7 @@ io.on('connection', (socket) => {
 
   socket.on('msg:incoming', (msg) => {
     addNewMessage(msg);
-    console.log("Broadcasting msg")
+    console.log('Broadcasting msg');
     io.emit('msg:broadcast', msg);
   });
 
