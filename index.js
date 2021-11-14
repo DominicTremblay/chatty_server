@@ -20,6 +20,7 @@ const io = new Server(server, {
 });
 
 const users = {};
+const messageHistory = [];
 
 const createAvatar = () => {
   const avatars = {
@@ -66,9 +67,13 @@ const removeUser = (socketId, users) => {
 };
 
 const addNewMessage = (msg) => {
-  const { from } = msg;
 
-  users[from].messages.push(msg);
+  msg.id = uuidv4();
+  msg.time = new Date();
+
+  messageHistory.push(msg);
+
+  return msg;
 };
 
 app.get('/', (req, res) => {
@@ -84,9 +89,9 @@ io.on('connection', (socket) => {
   socket.emit('init:user_info', newUser);
 
   socket.on('msg:incoming', (msg) => {
-    addNewMessage(msg);
+    const newMsg = addNewMessage(msg);
     console.log('Broadcasting msg');
-    io.emit('msg:broadcast', msg);
+    io.emit('msg:broadcast', newMsg);
   });
 
   socket.on('disconnect', () => {
